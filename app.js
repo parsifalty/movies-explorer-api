@@ -5,10 +5,13 @@ const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const NotFoundError = require("./errors/NotFoundError");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
+const cors = require("cors");
 
 const { PORT = 3000, DB_URL = "mongodb://0.0.0.0:27017/diploma" } = process.env;
 
 const app = express();
+
+app.use(cors());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
