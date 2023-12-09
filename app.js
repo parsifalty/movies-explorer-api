@@ -1,12 +1,12 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
-const NotFoundError = require('./errors/NotFoundError');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const NotFoundError = require("./errors/NotFoundError");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
-const { PORT = 3000, DB_URL = 'mongodb://localhost:27017/diploma' } = process.env;
+const { PORT = 3000, DB_URL = "mongodb://0.0.0.0:27017/diploma" } = process.env;
 
 const app = express();
 
@@ -28,24 +28,24 @@ mongoose.connect(DB_URL, {
 
 app.use(requestLogger);
 
-app.get('/crash-test', () => {
+app.get("/crash-test", () => {
   setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
+    throw new Error("Сервер сейчас упадёт");
   }, 0);
 });
 
-app.use('/', require('./routes/index'));
+app.use("/", require("./routes/index"));
 
 app.use(errorLogger);
 
-app.use('*', () => {
-  throw new NotFoundError('страница не найдена');
+app.use("*", () => {
+  throw new NotFoundError("страница не найдена");
 });
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).send({
-    message: statusCode === 500 ? 'На сервере произошла обишка' : message,
+    message: statusCode === 500 ? "На сервере произошла обишка" : message,
   });
   next();
 });
