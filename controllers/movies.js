@@ -65,26 +65,26 @@ module.exports.postMovie = (req, res, next) => {
 };
 
 module.exports.deleteMovie = (req, res, next) => {
-  const { id: movieId } = req.params;
-  Movie.findById(movieId)
+  Movie.findById(req.params.movieId)
+    .orFail()
     .then((movie) => {
-      if (!movie) {
-        next(new NotFoundError("Фильм не найден"));
-      } else if (movie.owner.toString() !== req.user._id) {
-        next(
-          new ForbiddenError(
-            "Данный фил м нельзя удалить так как вы не являеть создателем"
-          )
-        );
-      } else {
-        Movie.findByIdAndDelete(movieId)
-          .then((deletedMovie) => {
-            res.status(200).send({ data: deletedMovie });
-          })
-          .catch(next);
+      if (!movie.owner.equals(req.user._id)) {
+        throw new ForbiddenError("Карточка другого пользователя");
       }
+      Movie.deleteOne(movie)
+        .orFail()
+        .then(() => {
+          res.status(SUCCESS_STATUS).send({ message: "карточка была удалена" });
+        })
+        .catch((err) => {
+          next(err);
+        });
     })
     .catch((err) => {
-      next(err);
+      if (err.name === "CastError") {
+        next(new BadRequestError(`Неккоректный айди ${req.params.cardId}`));
+      } else {
+        next(err);
+      }
     });
 };
